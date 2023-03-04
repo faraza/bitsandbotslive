@@ -1,4 +1,6 @@
 {
-	"/": [],
-	"/rooms/[id]": []
+	"/": [
+		"src/routes/+layout.ts",
+		"src/routes/+layout.ts"
+	]
 }
