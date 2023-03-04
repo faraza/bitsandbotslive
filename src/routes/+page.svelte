@@ -1,26 +1,28 @@
 <script lang="ts">
 	import LandingPage from '$lib/components/setup/LandingPage.svelte'
-	import RoomPage from '$lib/components/game/RoomPage.svelte';
-	import type {GenAndPrompt} from '$lib/api/setup'
-	import {sendCreateRoom, sendJoinRoom} from '$lib/data/ServerSending'
-	import {userName, mainGenPrompt, mainGenURL, roomCode} from '$lib/data/store'
-	import {onMount} from 'svelte'
+	import RoomPage from '$lib/components/game/RoomPage.svelte'
+	import type { GenAndPrompt } from '$lib/api/setup'
+	import { sendCreateRoom, sendJoinRoom } from '$lib/data/ServerSending'
+	import { userName, mainGenPrompt, mainGenURL, roomCode, isHost, hostName } from '$lib/data/store'
 
-	enum SetupState {SettingUpRoom, Landing, InRoom}
-	let curState = SetupState.Landing //TODO: Update based on messages from server
-	let curRoomCode = ""	
-	let curUserName = ""
+	enum SetupState {
+		SettingUpRoom,
+		Landing,
+		InRoom
+	}
+	let curState = SetupState.Landing
+	let curRoomCode = ''
+	let curUserName = ''
 
-	let curMainGenPrompt = ""
-	let curMainGenURL = ""
+	let curMainGenPrompt = ''
+	let curMainGenURL = ''
+	let amIHost = false
 
 	mainGenPrompt.subscribe((value) => {
-		console.log("Main gen prompt changed to: " + value)
 		curMainGenPrompt = value
 	})
 
 	mainGenURL.subscribe((value) => {
-		console.log("Main gen URL changed to: " + value)
 		curMainGenURL = value
 	})
 
@@ -28,61 +30,63 @@
 		curUserName = value
 	})
 
-	roomCode.subscribe((value)=>{
-		if(curRoomCode.length == 0)
+	roomCode.subscribe((value) => {
+		if (curRoomCode.length == 0){
 			curRoomCode = value
-	})	
+		}
+		if(value.length > 0 && amIHost){
+			curState = SetupState.InRoom
+		}
+	})
 
-	// hostName.subscribe((value)=>{		
-	// 	if(value){
-	// 		if(curState != SetupState.SettingUpRoom){
-	// 			console.log("ERROR: Game started, but not in setting up room state")
-	// 		}
-	// 		curState = SetupState.InRoom
-	// 	}
-	// })
+	isHost.subscribe((value) => {
+		amIHost = value
+	})
 
-	function requestServerForRoom(mainGeneration: GenAndPrompt){ //TODO: This is passing as empty for some reason. Refactor out and just use store
-		console.log("Request Server for room. MainGen URL: " + curMainGenURL + " MainGen Prompt: " + curMainGenPrompt)		
+	hostName.subscribe((value) => {
+		if(!amIHost && value.length > 0){
+			curState = SetupState.InRoom
+		}
+	})
+
+	function requestServerForRoom(mainGeneration: GenAndPrompt) {		
 		sendCreateRoom(curUserName, curMainGenURL, curMainGenPrompt)
-
-		setTimeout(()=>{
-			roomCode.set("0451")
-		}, 1000) //TODO: Just for testing
-		// sendCreateRoom(curUserName, mainGeneration.imageURL, mainGeneration.imagePrompt)
+		
 	}
 
-	
-
-	function setupHostRoom(mainGeneration: GenAndPrompt){ //TODO: This is passing as empty for some reason. Refactor out and just use store
-		console.log("Setup host room")
+	function setupHostRoom(mainGeneration: GenAndPrompt) {
+		//TODO: This is passing as empty for some reason. Refactor out and just use store
 		console.log(mainGeneration)
 		curState = SetupState.SettingUpRoom
-		requestServerForRoom(mainGeneration)	
-		
-		curState = SetupState.InRoom //TODO: Wait until server says in room
+		requestServerForRoom(mainGeneration)
+
+		// curState = SetupState.InRoom //TODO: Wait until server says in room
 	}
 
-	function connectToGuestRoom(roomCode: string){		
+	function connectToGuestRoom(roomCode: string) {
 		curState = SetupState.SettingUpRoom
 		curRoomCode = roomCode
 		sendJoinRoom(curUserName, roomCode)
-
-		curState = SetupState.InRoom
-	}
-	
 		
+		// curState = SetupState.InRoom //TODO
+	}
 </script>
 
 <div class="outer">
-	<div>		
+	<div>
 		{#if curState == SetupState.SettingUpRoom}
 			<h1>Setting up room...</h1>
 		{:else if curState == SetupState.Landing}
-			<LandingPage on:guestSetupComplete={(event)=>{connectToGuestRoom(event.detail.roomCode)}}
-			on:hostSetupComplete={(event)=>{setupHostRoom(event.detail)}}/>				
+			<LandingPage
+				on:guestSetupComplete={(event) => {
+					connectToGuestRoom(event.detail.roomCode)
+				}}
+				on:hostSetupComplete={(event) => {
+					setupHostRoom(event.detail)
+				}}
+			/>
 		{:else if curState == SetupState.InRoom}
-			<RoomPage roomCode={curRoomCode}/>		
+			<RoomPage roomCode={curRoomCode} />
 		{/if}
 	</div>
 </div>
@@ -91,13 +95,7 @@
 	h1 {
 		font-size: 4em;
 		text-align: center;
-	}
-
-	// .outer {
-	// 	display: flex;
-	// 	justify-content: center;
-	// 	height: 100%;		
-	// }
+	}	
 
 	div {
 		display: flex;
@@ -107,7 +105,6 @@
 
 		width: 256px;
 		margin: auto;
-	
 
 		p {
 			text-align: center;

@@ -4,17 +4,18 @@ export const apiKey = writable('')
 export const userName = writable('')
 export const isHost = writable(false)
 
+let myUsername = ''
+userName.subscribe(value => {
+    myUsername = value
+})
+
 //Only include other players in this list
 export const playersList = writable([])
 
-export const playersAndImages = writable([['faraz', 'https://picsum.photos/200/300'], ['thomas', 'https://picsum.photos/200/300']])
+export const playersAndImages = writable([])//writable([['faraz', 'https://picsum.photos/200/300'], ['thomas', 'https://picsum.photos/200/300']])
 
-export const hostName = writable('') //TODO: Set from server
+export const hostName = writable('')
 
-// export const mainImageUrl = writable('https://oaidalleapiprodscus.blob.core.windows.net/private/org-DNJha0NDtZu4TaAeqp1F2kY3/user-gsFNHULRvVK2JmgcU67kpUpK/img-eOYDbkllsGc2zSOiQzuQlQs5.png?st=2023-03-03T07%3A35%3A12Z&se=2023-03-03T09%3A35%3A12Z&sp=r&sv=2021-08-06&sr=b&rscd=inline&rsct=image/png&skoid=6aaadede-4fb3-4698-a8f6-684d7786b067&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2023-03-03T05%3A24%3A24Z&ske=2023-03-04T05%3A24%3A24Z&sks=b&skv=2021-08-06&sig=/Za2B0x6Jjbvfz6tfO/nppYikAG7ubfDCvVBVnnRL4o%3D')
-//TODO: ^ set from server
-export const mainImageUrl = writable('')
-export const secondsOnTimer = writable(60) //TODO: Remove from this file
 
 export const connectedToWebsocket = writable(false)
 
@@ -25,25 +26,101 @@ export const mainGenURL = writable('')
 
 export const gameStarted = writable(false)
 export const roomCode = writable('')
+export const gameWinner = writable('')
+
+export const timeRemaining = writable(0)
+let curTimeRemaining = 0
+timeRemaining.subscribe(value => {
+    curTimeRemaining = value
+})
+export const startRunningTimer = writable(false)
+let wasRunning = false
+startRunningTimer.subscribe(value => {
+    if(wasRunning) return
+    if(value){
+        console.log("Start running timer")
+        wasRunning = true
+        const initialStartTime = 30
+        timeRemaining.set(initialStartTime)
+        setTimeout(decrementTimer, 1000)
+    }
+})
+
+function decrementTimer(){
+    if(curTimeRemaining <= 0){
+        return
+    }
+    console.log("Decrementing timer. Time remaining: " + curTimeRemaining + " seconds")
+    timeRemaining.set(curTimeRemaining - 1)
+    setTimeout(decrementTimer, 1000)
+}
 
 export const connectToServer = ()=>{
-    // const ws  = new WebSocket('ws://157.245.2.112:8080')
-    // websocket.set(ws)
-    // ws.addEventListener('open', (event)=>{
-    //     console.log('Connected to server')
-    //     console.log(event)
-    //     connectedToWebsocket.set(true)
-    // })
+    const ws  = new WebSocket('wss://api.bitsandbotsgame.com:8081')
+    websocket.set(ws)
+    ws.addEventListener('open', (event)=>{
+        console.log('Connected to server')
+        console.log(event)
+        connectedToWebsocket.set(true)
+    })
     
-    // ws.addEventListener('message', (message)=>{
-    //     console.log('Received message from server')
-    //     // console.log(message)
-    //     const data: Request = JSON.parse(message.data);
-    //     console.log(data)
-    // })
-    // ws.addEventListener('error', (event)=>{
-    //     console.log("Websocket error")
-    //     console.log(event)
-    // })
+    ws.addEventListener('message', (message)=>{
+        console.log('Received message from server')
+        // console.log(message)
+        const data = JSON.parse(message.data);
+        console.log(data)
+        processServerMessage(data)
+    })
+    ws.addEventListener('error', (event)=>{
+        console.log("Websocket error")
+        console.log(event)
+    })
+}
+
+function processServerMessage(serverMessage: any){
+    if(serverMessage.type == 'create-room-response'){
+        roomCode.set(serverMessage.roomID)
+    }
+    else if(serverMessage.type == 'start-game'){
+        gameStarted.set(true)
+    }
+    else if(serverMessage.type == 'update-state'){        
+        processGameStateMessage(serverMessage.game)                
+    }
+}
+
+function processGameStateMessage(gamestate: any){
+    const hostObject = gamestate.host     
+    hostName.set(hostObject.username)
+    mainGenPrompt.set(hostObject.imagePrompt)
+    mainGenURL.set(hostObject.imageURL)
+
+    const players: any = gamestate.players
+    processUpdatedPlayersList(players)    
+    
+
+    if (gamestate.state == 'finished'){
+        gameWinner.set(gamestate.winner)
+    }
+    else if (gamestate.state == 'guessing'){
+        gameStarted.set(true)
+    }
+}
+
+function processUpdatedPlayersList(receivedPlayersList: any){
+    let newPlayersList: any = []
+    let newPlayersAndImages: any = []
+
+    for (let i = 0; i < receivedPlayersList.length; i++){
+        const playerObject = receivedPlayersList[i]
+        if(playerObject.username == myUsername){
+            continue
+        }
+        newPlayersList.push(playerObject.username)
+        newPlayersAndImages.push([playerObject.username, playerObject.imageURL, playerObject.imagePrompt])
+    }
+
+    playersList.set(newPlayersList)
+    playersAndImages.set(newPlayersAndImages)
 
 }

@@ -1,13 +1,17 @@
 <script lang="ts">
-    import {isHost, playersList} from '$lib/data/store'  
+    import {isHost, playersList, hostName} from '$lib/data/store'  
     import TextButton from '$lib/components/common/TextButton.svelte'  
     import {createEventDispatcher} from 'svelte'
 	import { onMount } from 'svelte'
     import { getDummyPlayersList1, getDummyPlayersList2 } from '$lib/data/DummyData';
 
     let amIHost = true
+    let curHostName = ''
     isHost.subscribe((value) => {
         amIHost = value
+    })
+    hostName.subscribe((value) => {
+        curHostName = value
     })
 
     const dispatch = createEventDispatcher()
@@ -22,19 +26,6 @@
         dispatch('started')
     }
 
-    onMount(()=>{
-        setTimeout(()=>{
-            const dummy1 = getDummyPlayersList1() as any
-            playersList.set(dummy1)
-        }, 5000)
-
-        setTimeout(()=>{
-            const dummy2 = getDummyPlayersList2() as any
-            playersList.set(dummy2)
-        }, 8000)
-        
-    })
-
 </script>
 
 <div>
@@ -43,7 +34,7 @@
         <TextButton on:click={()=>{startPressed()}}>Start</TextButton>
     {:else}
         
-        <h3>Waiting for host to start the game</h3>        
+        <h3>Waiting for {curHostName} to start the game</h3>        
     {/if}    
 
     <h2>Current Players:</h2>

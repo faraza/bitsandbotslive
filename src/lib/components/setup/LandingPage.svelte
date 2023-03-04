@@ -5,7 +5,7 @@
     import CredentialsPage from './CredentialsPage.svelte'
 	import type { Credentials } from '$lib/api/setup'
 	import HostGeneratePage from './HostGeneratePage.svelte'
-	import {apiKey, userName, isHost, connectedToWebsocket, connectToServer, mainGenPrompt, mainGenURL, hostName} from '$lib/data/store'
+	import {apiKey, userName, isHost, connectedToWebsocket, connectToServer, hostName} from '$lib/data/store'
 	import type {GenAndPrompt} from '$lib/api/setup'
 	
 	enum SetupState {
@@ -29,7 +29,6 @@
 		}
 		isConnectedToServer = value
 		if(isConnectedToServer){
-			console.log("Connected to server received. Sending setup complete message")
 			if(setupState == SetupState.CredentialingGuest){
 				dispatch('guestSetupComplete', {'roomCode': roomCode})
 			}
@@ -37,7 +36,7 @@
 				dispatch('hostSetupComplete', {'mainGeneration': curMainGeneration}) //TODO: This isn't working. Using stores for now. Refactor?
 			}
 			else{
-				console.log("ERROR Connected to server received, but not in a state to send setup complete message")
+				// console.log("ERROR Connected to server received, but not in a state to send setup complete message")
 			}			
 		}
 	})
@@ -47,17 +46,12 @@
     let setupState = SetupState.Landing
 
 	function completeHostSetup(mainGeneration: GenAndPrompt){		
-		console.log("1. Host setup complete. Main Generation.")
 		console.log(mainGeneration)
 		curMainGeneration = mainGeneration		
 		console.log(curMainGeneration)
-		// mainGenPrompt.set(mainGeneration.imagePrompt)
-		// mainGenURL.set(mainGeneration.imageURL)
+		
 		if (!isConnectedToServer){
 			connectToServer()	
-			setTimeout(()=>{ //TODO: Delete this when Websocket works
-				connectedToWebsocket.set(true)
-			}, 1000)
 		}
 		else{
 			console.log("ERROR - completeHostSetup called when already connected to server")
@@ -68,10 +62,7 @@
 	function completeGuestSetup(){
 		console.log("1. Guest setup complete")
 		if (!isConnectedToServer){
-			connectToServer()
-			setTimeout(()=>{ //TODO: Delete this when Websocket works
-				connectedToWebsocket.set(true)
-			}, 1000)	
+			connectToServer()	
 		}
 		else{
 			console.log("ERROR - completeGuestSetup called when already connected to server")

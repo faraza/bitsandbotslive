@@ -56,7 +56,8 @@ export function sendUpdatePlayerState(userName: string, imageURL: string, imageP
     const request = { //TODO: Include image prompt once API has been updated
         type: 'update-player-state',
         username: userName,
-        imageID: imageURL,
+        imageURL: imageURL,
+        imagePrompt: imagePrompt,
         state: state
     }
     
@@ -67,5 +68,5 @@ export function sendUpdatePlayerState(userName: string, imageURL: string, imageP
 function sendRequest(stringifiedJson: string){
     console.log("Sending request to server")
     console.log(stringifiedJson)
-    // myWebSocket.send(stringifiedJson)
+    myWebSocket.send(stringifiedJson)
 }
