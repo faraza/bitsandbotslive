@@ -4,7 +4,7 @@ export const manifest = {
 	assets: new Set(["background/dotted_grid.png","background/sphere_grid.png","favicon 3.png","favicon.png","icons/caret_icon.png","icons/close_icon.png","icons/collapse_icon.png","icons/expand_icon.png","icons/help_icon.png","icons/image_icon.png"]),
 	mimeTypes: {".png":"image/png"},
 	_: {
-		client: {"start":{"file":"_app/immutable/entry/start.94b828c9.js","imports":["_app/immutable/entry/start.94b828c9.js","_app/immutable/chunks/index.337f5233.js","_app/immutable/chunks/singletons.5e2c88fd.js","_app/immutable/chunks/paths.37834cc4.js"],"stylesheets":[],"fonts":[]},"app":{"file":"_app/immutable/entry/app.40c70cd8.js","imports":["_app/immutable/entry/app.40c70cd8.js","_app/immutable/chunks/index.337f5233.js"],"stylesheets":[],"fonts":[]}},
+		client: {"start":{"file":"_app/immutable/entry/start.f26a3234.js","imports":["_app/immutable/entry/start.f26a3234.js","_app/immutable/chunks/index.337f5233.js","_app/immutable/chunks/singletons.8e6f7e00.js","_app/immutable/chunks/paths.bff6e510.js"],"stylesheets":[],"fonts":[]},"app":{"file":"_app/immutable/entry/app.04934c2a.js","imports":["_app/immutable/entry/app.04934c2a.js","_app/immutable/chunks/index.337f5233.js"],"stylesheets":[],"fonts":[]}},
 		nodes: [
 			() => import('./nodes/0.js'),
 			() => import('./nodes/1.js'),
