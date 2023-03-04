@@ -27,23 +27,23 @@ export const gameStarted = writable(false)
 export const roomCode = writable('')
 
 export const connectToServer = ()=>{
-    const ws  = new WebSocket('ws://157.245.2.112:8080')
-    websocket.set(ws)
-    ws.addEventListener('open', (event)=>{
-        console.log('Connected to server')
-        console.log(event)
-        connectedToWebsocket.set(true)
-    })
+    // const ws  = new WebSocket('ws://157.245.2.112:8080')
+    // websocket.set(ws)
+    // ws.addEventListener('open', (event)=>{
+    //     console.log('Connected to server')
+    //     console.log(event)
+    //     connectedToWebsocket.set(true)
+    // })
     
-    ws.addEventListener('message', (message)=>{
-        console.log('Received message from server')
-        // console.log(message)
-        const data: Request = JSON.parse(message.data);
-        console.log(data)
-    })
-    ws.addEventListener('error', (event)=>{
-        console.log("Websocket error")
-        console.log(event)
-    })
+    // ws.addEventListener('message', (message)=>{
+    //     console.log('Received message from server')
+    //     // console.log(message)
+    //     const data: Request = JSON.parse(message.data);
+    //     console.log(data)
+    // })
+    // ws.addEventListener('error', (event)=>{
+    //     console.log("Websocket error")
+    //     console.log(event)
+    // })
 
 }

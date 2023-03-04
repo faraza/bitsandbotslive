@@ -55,6 +55,9 @@
 		// mainGenURL.set(mainGeneration.imageURL)
 		if (!isConnectedToServer){
 			connectToServer()	
+			setTimeout(()=>{ //TODO: Delete this when Websocket works
+				connectedToWebsocket.set(true)
+			}, 1000)
 		}
 		else{
 			console.log("ERROR - completeHostSetup called when already connected to server")
@@ -65,7 +68,10 @@
 	function completeGuestSetup(){
 		console.log("1. Guest setup complete")
 		if (!isConnectedToServer){
-			connectToServer()	
+			connectToServer()
+			setTimeout(()=>{ //TODO: Delete this when Websocket works
+				connectedToWebsocket.set(true)
+			}, 1000)	
 		}
 		else{
 			console.log("ERROR - completeGuestSetup called when already connected to server")

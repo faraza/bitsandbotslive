@@ -67,5 +67,5 @@ export function sendUpdatePlayerState(userName: string, imageURL: string, imageP
 function sendRequest(stringifiedJson: string){
     console.log("Sending request to server")
     console.log(stringifiedJson)
-    myWebSocket.send(stringifiedJson)
+    // myWebSocket.send(stringifiedJson)
 }
